@@ -50,7 +50,7 @@ if( isset($_REQUEST['text']) ) {
 	}
 }
 ?>
-
+<input type=button value="刷新" onclick="location.reload()"/> 
 <!--<div class="related-list relatedList-tips" style="height:405px">-->  
 <?php if( is_array( $ms['statuses'] ) ):
 	$mysql = new SaeMysql();
@@ -62,38 +62,52 @@ if( isset($_REQUEST['text']) ) {
     <?php echo '发布于：';?>
     <?=$item['created_at'];echo "<br />";?>
     <?//=$item['id'];?>
-    <?php echo '作者：'?>
-    <?=$item['user']['name'];?>
-    <form action="handleagree.php"> <input type="hidden" name ="pid" value="<?echo $item['idstr'];?>"> 
+    <?php echo '作者：';?>
+    <?=$item['user']['name'];echo "<br />";?>
+     <?
+     $format1= "select agree from vote where uid = '%s' and tid ='%s'";
+     $format2= "select disagree from vote where uid = '%s' and tid ='%s'";
+     $search1= sprintf($format1,$item['user']['idstr'],$item['idstr']);
+	 $search2= sprintf($format2,$item['user']['idstr'],$item['idstr']);
+    // $result= $mysql -> getVar($search);
+    // $result= $mysql -> getVar($search);
+     $agree= $mysql -> getVar($search1);
+
+     $disagree= $mysql -> getVar($search2);
+   //   $result= $mysql -> getVar($search);
+    // $result= $mysql -> getVar($search);*/
+	//   var_dump($result);
+
+//$agree = $result['agree'];
+//echo $agree;
+//       $disagree = $result['disagree'];
+        
+    ?>
+    <form style="display:inline;"action="handleagree.php"> <input type="hidden" name ="pid" value="<?echo $item['idstr'];?>"> 
     <input type="hidden" name ="uid" value="<?echo $item['user']['idstr'];?>"> 
     <input type="hidden" name ="agree" value="0" > 
     <input type="hidden" name ="disagree" value="0"> 
     <input type="hidden" name ="result" value="0">
     <input type="hidden" name ="flag" value="0"> 
-    <input type="submit" name="agree" value="truth" />
-    </form>
-    <form action="handledisagree.php"> <input type="hidden" name ="pid" value="<?echo $item['idstr'];?>"> 
+    <input type="submit" value ="真相 <?echo $agree;?> "/> 
+    </form >
+    <form style="display:inline;" action="handledisagree.php"> <input type="hidden" name ="pid" value="<?echo $item['idstr'];?>"> 
     <input type="hidden" name ="uid" value="<?echo $item['user']['idstr'];?>"> 
     <input type="hidden" name ="agree" value="0"> 
     <input type="hidden" name ="disagree" value="0"> 
     <input type="hidden" name ="result" value="0">
     <input type="hidden" name ="flag" value="0"> 
-    <input type="submit" name ="disagree" value="rumor"/>
+    <input type="submit" value ="假象 <?echo $disagree;?>">
     </form>
-    <?
-        $format= "select * from `vote` where uid = `%s` and pid =`%s`";
-        $search= sprintf($format,$item['user']['idstr'],$item['idstr']);
-        echo $search;
-        $result= $mysql -> getVar($search);    
-        var_dump($result);
-        $agree = $result['agree'];
-        echo $agree;
-        $disagree = $result['disagree'];
-        
+    <? 
+	   $result="投票未结束！";
+       if($agree > 10)
+           $result="是真相";
+       else if($disagree> 10)
+           $result="是谣言";
+       echo "<div>".$result."</div>";
     ?>
-    <input type="button" value ="agree <?echo $agree;?>">
-    <input type="button" value ="oppose <?echo $disagree;?>">
-     <?php
+    <?php
      try{	
      $format = "insert into weibo(tid,text,uid,time) values('%s','%s','%s','%s')";
      $format1 = "insert into usrinfo(uid,screen_name,description) values('%s','%s','%s')";
